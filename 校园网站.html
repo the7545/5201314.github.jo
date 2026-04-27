@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, shrink-to-fit=no, viewport-fit=cover">
+  <title>校园生活平台 · 聊天 · 交易 · 支付</title>
+  <style>
+    :root {
+      --primary: #07C160;
+      --primary-dark: #06AD56;
+      --wechat: #09BB07;
+      --alipay: #1677FF;
+      --bg: #f5f6f8;
+      --card: #fff;
+      --text: #1a1a2e;
+      --text-secondary: #666;
+      --border: #e8e8e8;
+      --shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+      --shadow-lg: 0 12px 28px rgba(0, 0, 0, 0.1);
+      --radius: 18px;
+      --radius-sm: 12px;
+      --transition: 0.25s ease;
+      --danger: #e74c3c;
+      --forum: #6c5ce7;
+      --market: #e17055;
+      --recycle: #00b894;
+      --admin: #2d3436;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+      padding-bottom: 80px;
+    }
+    .navbar {
+      background: rgba(255,255,255,0.92);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 1px 12px rgba(0,0,0,0.04);
+    }
+    .navbar-inner {
+      max-width: 1100px; margin: 0 auto; padding: 10px 20px;
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;
+    }
+    .logo { font-size: 1.5rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 6px; cursor: pointer; }
+    .logo .icon { width: 34px; height: 34px; background: var(--primary); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; color: #fff; }
+    .nav-links { display: flex; gap: 4px; flex-wrap: wrap; }
+    .nav-links button {
+      padding: 8px 14px; border: none; background: transparent; border-radius: 25px; cursor: pointer;
+      font-size: 0.9rem; font-weight: 500; color: var(--text-secondary); transition: var(--transition); white-space: nowrap; display: flex; align-items: center; gap: 4px;
+    }
+    .nav-links button:hover { background: #f0f0f0; color: #1a1a2e; }
+    .nav-links button.active { background: var(--primary); color: #fff; font-weight: 600; box-shadow: 0 6px 16px rgba(7, 193, 96, 0.3); }
+    .user-area { display: flex; align-items: center; gap: 8px; }
+    .btn-sm { padding: 6px 16px; border-radius: 20px; border: none; cursor: pointer; font-size: 0.85rem; font-weight: 500; transition: var(--transition); }
+    .btn-login { background: var(--primary); color: #fff; }
+    .btn-login:hover { background: var(--primary-dark); }
+    .btn-logout { background: #f0f0f0; color: #555; }
+    .btn-logout:hover { background: #e0e0e0; }
+    .btn-admin-badge { background: var(--admin); color: #fff; font-size: 0.7rem; padding: 4px 10px; border-radius: 12px; font-weight: 600; }
+    .main-container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+    .page { display: none; animation: fadeSlide 0.3s ease; }
+    .page.active { display: block; }
+    @keyframes fadeSlide { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+    .card {
+      background: var(--card); border-radius: var(--radius); padding: 18px 20px; margin-bottom: 14px;
+      box-shadow: var(--shadow); border: 1px solid transparent; transition: var(--transition);
+    }
+    .card:hover { box-shadow: var(--shadow-lg); border-color: #f0f0f0; }
+    .card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; flex-wrap: wrap; gap: 8px; }
+    .badge { display: inline-block; padding: 4px 10px; border-radius: 14px; font-size: 0.7rem; font-weight: 600; }
+    .badge-forum { background: #f0ebff; color: var(--forum); }
+    .badge-market { background: #fff3ef; color: var(--market); }
+    .badge-rent { background: #fff8e1; color: #e67e22; }
+    .badge-sell { background: #ffeaea; color: #e74c3c; }
+    .badge-recycle { background: #e8faf3; color: var(--recycle); }
+    .btn { padding: 10px 20px; border-radius: 25px; border: none; cursor: pointer; font-weight: 600; font-size: 0.9rem; transition: var(--transition); display: inline-flex; align-items: center; gap: 6px; }
+    .btn-primary { background: var(--primary); color: #fff; }
+    .btn-primary:hover { background: var(--primary-dark); }
+    .btn-outline { background: #fff; border: 2px solid var(--border); color: #444; }
+    .btn-outline:hover { border-color: var(--primary); color: var(--primary); }
+    .btn-wechat { background: var(--wechat); color: #fff; }
+    .btn-wechat:hover { background: #06AD56; }
+    .btn-alipay { background: var(--alipay); color: #fff; }
+    .btn-alipay:hover { background: #1256cc; }
+    .grid-2 { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+    .media-preview { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+    .media-item { width: 80px; height: 80px; border-radius: 8px; overflow: hidden; background: #f0f0f0; display: flex; align-items: center; justify-content: center; border: 2px solid var(--border); position: relative; }
+    .media-item img, .media-item video { width: 100%; height: 100%; object-fit: cover; }
+    .remove-media { position: absolute; top: 2px; right: 2px; background: rgba(0,0,0,0.6); color: #fff; border: none; border-radius: 50%; width: 20px; height: 20px; font-size: 12px; cursor: pointer; }
+    .toast { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 10px 22px; border-radius: 25px; font-weight: 500; z-index: 3000; box-shadow: 0 8px 20px rgba(0,0,0,0.2); }
+    .toast.success { background: #07C160; }
+    .toast.error { background: #e74c3c; }
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5);
+      z-index: 2000; display: flex; align-items: center; justify-content: center; animation: fadeIn 0.2s;
+    }
+    .modal {
+      background: #fff; border-radius: var(--radius); padding: 24px; width: 90%; max-width: 500px;
+      box-shadow: var(--shadow-lg); position: relative; max-height: 85vh; overflow-y: auto;
+    }
+    .modal-close { position: absolute; top: 12px; right: 16px; background: none; border: none; font-size: 1.4rem; cursor: pointer; color: #888; }
+    .chat-messages { max-height: 250px; overflow-y: auto; background: #f9fafb; border-radius: 12px; padding: 10px; margin: 10px 0; }
+    .chat-bubble { margin-bottom: 10px; display: flex; flex-direction: column; }
+    .chat-bubble.mine { align-items: flex-end; }
+    .chat-bubble.other { align-items: flex-start; }
+    .chat-bubble .msg { max-width: 75%; padding: 8px 14px; border-radius: 18px; font-size: 0.9rem; word-break: break-word; }
+    .mine .msg { background: #d1fae5; color: #065f46; }
+    .other .msg { background: #fff; border: 1px solid #e5e7eb; color: #1f2937; }
+    .chat-bubble .meta { font-size: 0.7rem; color: #999; margin: 2px 4px 0; }
+    .payment-modal { max-width: 350px; }
+    @media (max-width: 600px) {
+      .navbar-inner { padding: 8px 12px; }
+      .nav-links button { padding: 6px 10px; font-size: 0.8rem; }
+    }
+  </style>
+</head>
+<body>
+  <!-- 导航栏 -->
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <div class="logo" onclick="navigateTo('home')"><div class="icon">🎓</div>校园生活</div>
+      <div class="nav-links">
+        <button onclick="navigateTo('home')" data-page="home" class="active" id="nav-home">🏠 首页</button>
+        <button onclick="navigateTo('forum')" data-page="forum" id="nav-forum">💬 论坛</button>
+        <button onclick="navigateTo('market')" data-page="market" id="nav-market">🛒 市场</button>
+        <button onclick="navigateTo('recycle')" data-page="recycle" id="nav-recycle">♻️ 回收</button>
+      </div>
+      <div class="user-area" id="userArea">
+        <span id="notLoggedIn"><button class="btn-sm btn-login" onclick="openLoginModal()">🔑 微信登录</button></span>
+        <span id="loggedIn" style="display:none;"><span id="userNameDisplay"></span><span id="adminBadgePlaceholder"></span><button class="btn-sm btn-logout" onclick="logout()">退出</button></span>
+      </div>
+    </div>
+  </nav>
+
+  <div class="main-container">
+    <div class="page active" id="page-home">
+      <h2 style="text-align:center;margin:20px 0;">👋 欢迎来到校园生活平台</h2>
+      <div class="card"><div class="card-header">📢 最新动态</div><div id="homeLatestPosts">加载中...</div></div>
+    </div>
+    <div class="page" id="page-forum">
+      <div class="card">
+        <div class="card-header"><span>💬 校园论坛</span><button class="btn btn-primary btn-sm" onclick="showForumForm()">📝 发布新帖</button></div>
+        <div id="forumForm" style="display:none;">
+          <div class="form-group"><label>标题</label><input type="text" id="forumTitle"></div>
+          <div class="form-group"><label>内容</label><textarea id="forumContent"></textarea></div>
+          <div class="form-group"><label>分类</label><select id="forumCategory"><option>学习交流</option><option>生活闲聊</option><option>校园通知</option><option>求助问答</option></select></div>
+          <div class="form-group"><label>📎 上传图片/视频</label><input type="file" id="forumMediaInput" accept="image/*,video/*" multiple onchange="previewMedia('forum')"><div class="media-preview" id="forumMediaPreview"></div></div>
+          <button class="btn btn-primary" onclick="submitForumPost()">发布</button>
+          <button class="btn btn-outline" onclick="hideForumForm()">取消</button>
+        </div>
+        <div id="forumPostsList"><div class="empty-state">暂无帖子</div></div>
+      </div>
+    </div>
+    <div class="page" id="page-market">
+      <div class="card">
+        <div class="card-header"><span>🛒 租买市场</span><button class="btn btn-primary btn-sm" onclick="showMarketForm()">📦 发布物品</button></div>
+        <div id="marketForm" style="display:none;">
+          <div class="form-group"><label>物品名称</label><input type="text" id="marketTitle"></div>
+          <div class="form-group"><label>描述</label><textarea id="marketDesc"></textarea></div>
+          <div class="form-group"><label>类型</label><select id="marketType"><option value="sell">出售</option><option value="rent">租用</option></select></div>
+          <div class="form-group"><label>价格(元)</label><input type="number" id="marketPrice"></div>
+          <div class="form-group"><label>分类</label><select id="marketCategory"><option>衣物</option><option>书籍</option><option>电子产品</option><option>其他</option></select></div>
+          <div class="form-group"><label>📎 上传图片/视频</label><input type="file" id="marketMediaInput" accept="image/*,video/*" multiple onchange="previewMedia('market')"><div class="media-preview" id="marketMediaPreview"></div></div>
+          <button class="btn btn-primary" onclick="submitMarketItem()">发布</button>
+          <button class="btn btn-outline" onclick="hideMarketForm()">取消</button>
+        </div>
+        <div id="marketItemsList"><div class="empty-state">暂无物品</div></div>
+      </div>
+    </div>
+    <div class="page" id="page-recycle">
+      <div class="card">
+        <div class="card-header"><span>♻️ 杂物回收</span><button class="btn btn-primary btn-sm" onclick="showRecycleForm()">📦 发布回收</button></div>
+        <div id="recycleForm" style="display:none;">
+          <div class="form-group"><label>物品名称</label><input type="text" id="recycleTitle"></div>
+          <div class="form-group"><label>描述</label><textarea id="recycleDesc"></textarea></div>
+          <div class="form-group"><label>分类</label><select id="recycleCategory"><option>纸张</option><option>塑料</option><option>电子产品</option><option>衣物</option><option>金属</option><option>其他</option></select></div>
+          <div class="form-group"><label>📎 上传图片/视频</label><input type="file" id="recycleMediaInput" accept="image/*,video/*" multiple onchange="previewMedia('recycle')"><div class="media-preview" id="recycleMediaPreview"></div></div>
+          <button class="btn btn-primary" onclick="submitRecycleItem()">发布</button>
+          <button class="btn btn-outline" onclick="hideRecycleForm()">取消</button>
+        </div>
+        <div id="recycleItemsList"><div class="empty-state">暂无回收信息</div></div>
+      </div>
+    </div>
+    <div class="page" id="page-admin">
+      <div class="card"><div class="card-header">🛡️ 管理员面板</div><div id="adminContentArea">选择管理功能</div></div>
+    </div>
+  </div>
+
+  <!-- 市场物品详情+聊天+支付模态框 -->
+  <div class="modal-overlay" id="marketDetailOverlay" style="display:none;">
+    <div class="modal" id="marketDetailModal">
+      <button class="modal-close" onclick="closeMarketDetail()">✕</button>
+      <div id="marketDetailContent"></div>
+    </div>
+  </div>
+
+  <!-- 登录模态框 -->
+  <div class="modal-overlay" id="loginModalOverlay" style="display:none;">
+    <div class="modal">
+      <button class="modal-close" onclick="closeLoginModal()">✕</button>
+      <h3>微信扫码登录</h3>
+      <div style="padding:20px;background:#f0f0f0;border-radius:12px;margin:10px 0;">📱 扫码演示</div>
+      <button class="btn btn-primary" onclick="simulateWechatLogin()">模拟扫码登录</button>
+      <button class="btn btn-outline" onclick="showAdminLogin()" style="margin-top:8px;">管理员密码登录</button>
+      <div id="adminLoginArea" style="display:none;margin-top:12px;">
+        <input type="text" id="adminUser" placeholder="用户名" style="width:100%;margin-bottom:6px;">
+        <input type="password" id="adminPwd" placeholder="密码" style="width:100%;margin-bottom:6px;">
+        <button class="btn btn-primary" onclick="adminLogin()">登录</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast容器 -->
+  <div id="toastContainer"></div>
+
+  <script>
+    const STORAGE_KEY = 'campus_platform_v3';
+    const DEFAULT_ADMIN = { id:'admin_001', username:'admin', password:'admin123', role:'admin', avatar:'🛡️', wechatNickname:'管理员' };
+
+    function getData() {
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if(raw) try { return JSON.parse(raw); } catch(e) {}
+      return initData();
+    }
+    function initData() {
+      const data = {
+        users: [DEFAULT_ADMIN],
+        forumPosts: [],
+        marketItems: [],
+        recycleItems: [],
+        currentUserId: null
+      };
+      const u = { id:'u1', username:'sample', password:'', role:'user', avatar:'👩', wechatNickname:'小明同学' };
+      data.users.push(u);
+      data.forumPosts.push({
+        id:'p1', userId:'u1', username:'小明同学', avatar:'👩',
+        title:'图书馆开放时间', content:'听说延长到11点', category:'校园通知',
+        date:new Date().toISOString(), comments:[], media:[]
+      });
+      data.marketItems.push({
+        id:'m1', userId:'u1', username:'小明同学', avatar:'👩',
+        title:'冬季羽绒服', description:'M码，很新，只穿过一次。', type:'sell', price:180,
+        category:'衣物', date:new Date().toISOString(), media:[],
+        chatMessages: [], paymentStatus: null
+      });
+      data.marketItems.push({
+        id:'m2', userId:'admin_001', username:'管理员', avatar:'🛡️',
+        title:'高等数学教材(可租)', description:'同济版，租用一学期。', type:'rent', price:5,
+        category:'书籍', date:new Date().toISOString(), media:[],
+        chatMessages: [], paymentStatus: null
+      });
+      data.recycleItems.push({
+        id:'r1', userId:'u1', username:'小明同学', avatar:'👩',
+        title:'旧报纸', description:'5公斤', category:'纸张',
+        date:new Date().toISOString(), media:[]
+      });
+      saveData(data);
+      return data;
+    }
+    function saveData(data) { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); }
+    function getCurrentUser() { const d=getData(); return d.currentUserId ? d.users.find(u=>u.id===d.currentUserId) : null; }
+    function isAdmin() { const u=getCurrentUser(); return u && u.role==='admin'; }
+
+    let selectedMedia = { forum:[], market:[], recycle:[] };
+
+    function previewMedia(type) {
+      const input = document.getElementById(type+'MediaInput');
+      const preview = document.getElementById(type+'MediaPreview');
+      if(!input.files) return;
+      selectedMedia[type] = [];
+      preview.innerHTML = '';
+      Array.from(input.files).forEach((file, idx)=>{
+        if(file.size > 15*1024*1024) { showToast('文件过大(最大15MB)','error'); return; }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          selectedMedia[type].push({ name:file.name, type:file.type, data:e.target.result });
+          const div = document.createElement('div'); div.className='media-item';
+          if(file.type.startsWith('image/')) div.innerHTML = `<img src="${e.target.result}"><button class="remove-media" onclick="removeMedia('${type}',${idx})">x</button>`;
+          else if(file.type.startsWith('video/')) div.innerHTML = `<video src="${e.target.result}" controls></video><button class="remove-media" onclick="removeMedia('${type}',${idx})">x</button>`;
+          preview.appendChild(div);
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+    function removeMedia(type, idx) {
+      selectedMedia[type].splice(idx,1);
+      document.getElementById(type+'MediaPreview').children[idx]?.remove();
+    }
+
+    function showToast(msg, cls='') {
+      const t = document.createElement('div'); t.className='toast '+cls; t.textContent=msg;
+      document.getElementById('toastContainer').appendChild(t);
+      setTimeout(()=>t.remove(), 2000);
+    }
+
+    function openLoginModal() { document.getElementById('loginModalOverlay').style.display='flex'; }
+    function closeLoginModal() { document.getElementById('loginModalOverlay').style.display='none'; }
+    function simulateWechatLogin() {
+      const names=['小明','小红','小刚']; const r=names[Math.floor(Math.random()*names.length)];
+      const data=getData(); let user=data.users.find(u=>u.wechatNickname===r && u.role==='user');
+      if(!user) { user={ id:'u'+Date.now(), username:'wx_'+r, password:'', role:'user', avatar:'👤', wechatNickname:r }; data.users.push(user); }
+      data.currentUserId=user.id; saveData(data); closeLoginModal(); updateUI(); refreshAll(); showToast('登录成功','success');
+    }
+    function showAdminLogin() { document.getElementById('adminLoginArea').style.display='block'; }
+    function adminLogin() {
+      const u=document.getElementById('adminUser').value.trim(), p=document.getElementById('adminPwd').value.trim();
+      const data=getData(); const admin=data.users.find(x=>x.username===u && x.password===p && x.role==='admin');
+      if(admin) { data.currentUserId=admin.id; saveData(data); closeLoginModal(); updateUI(); refreshAll(); showToast('管理员登录成功','success'); }
+      else showToast('账号或密码错误','error');
+    }
+    function logout() { const d=getData(); d.currentUserId=null; saveData(d); updateUI(); navigateTo('home'); }
+
+    function updateUI() {
+      const user=getCurrentUser();
+      document.getElementById('notLoggedIn').style.display=user?'none':'inline';
+      document.getElementById('loggedIn').style.display=user?'inline-flex':'none';
+      if(user) {
+        document.getElementById('userNameDisplay').textContent=user.wechatNickname||user.username;
+        document.getElementById('adminBadgePlaceholder').innerHTML=user.role==='admin'?'<span class="btn-admin-badge">管理员</span>':'';
+      }
+      const adminBtn = document.getElementById('nav-admin');
+      if(isAdmin()) {
+        if(!adminBtn) {
+          const btn=document.createElement('button'); btn.id='nav-admin'; btn.setAttribute('data-page','admin');
+          btn.innerHTML='🛡️ 管理'; btn.onclick=()=>navigateTo('admin');
+          document.querySelector('.nav-links').appendChild(btn);
+        }
+      } else { if(adminBtn) adminBtn.style.display='none'; }
+    }
+
+    function navigateTo(page) {
+      document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+      document.getElementById('page-'+page).classList.add('active');
+      document.querySelectorAll('.nav-links button').forEach(b=>b.classList.remove('active'));
+      const btn=document.getElementById('nav-'+page); if(btn) btn.classList.add('active');
+      refreshAll(); window.scrollTo(0,0);
+    }
+
+    function showForumForm() { if(!getCurrentUser()){ openLoginModal(); return; } document.getElementById('forumForm').style.display='block'; }
+    function hideForumForm() { document.getElementById('forumForm').style.display='none'; }
+    function submitForumPost() {
+      const user=getCurrentUser(); if(!user) return;
+      const title=document.getElementById('forumTitle').value.trim(), content=document.getElementById('forumContent').value.trim();
+      if(!title||!content) return showToast('请填写完整','error');
+      const data=getData();
+      data.forumPosts.unshift({ id:'p'+Date.now(), userId:user.id, username:user.wechatNickname, avatar:user.avatar, title, content, category:document.getElementById('forumCategory').value, date:new Date().toISOString(), comments:[], media:selectedMedia.forum });
+      saveData(data); hideForumForm(); selectedMedia.forum=[]; document.getElementById('forumMediaPreview').innerHTML=''; refreshAll(); showToast('发布成功','success');
+    }
+
+    function showMarketForm() { if(!getCurrentUser()){ openLoginModal(); return; } document.getElementById('marketForm').style.display='block'; }
+    function hideMarketForm() { document.getElementById('marketForm').style.display='none'; }
+    function submitMarketItem() {
+      const user=getCurrentUser(); if(!user) return;
+      const title=document.getElementById('marketTitle').value.trim(), desc=document.getElementById('marketDesc').value.trim();
+      if(!title||!desc) return showToast('请填写完整','error');
+      const data=getData();
+      data.marketItems.unshift({ id:'m'+Date.now(), userId:user.id, username:user.wechatNickname, avatar:user.avatar, title, description:desc, type:document.getElementById('marketType').value, price:parseFloat(document.getElementById('marketPrice').value)||0, category:document.getElementById('marketCategory').value, date:new Date().toISOString(), media:selectedMedia.market, chatMessages:[], paymentStatus:null });
+      saveData(data); hideMarketForm(); selectedMedia.market=[]; document.getElementById('marketMediaPreview').innerHTML=''; refreshAll(); showToast('发布成功','success');
+    }
+
+    function showRecycleForm() { if(!getCurrentUser()){ openLoginModal(); return; } document.getElementById('recycleForm').style.display='block'; }
+    function hideRecycleForm() { document.getElementById('recycleForm').style.display='none'; }
+    function submitRecycleItem() {
+      const user=getCurrentUser(); if(!user) return;
+      const title=document.getElementById('recycleTitle').value.trim(), desc=document.getElementById('recycleDesc').value.trim();
+      if(!title||!desc) return showToast('请填写完整','error');
+      const data=getData();
+      data.recycleItems.unshift({ id:'r'+Date.now(), userId:user.id, username:user.wechatNickname, avatar:user.avatar, title, description:desc, category:document.getElementById('recycleCategory').value, date:new Date().toISOString(), media:selectedMedia.recycle });
+      saveData(data); hideRecycleForm(); selectedMedia.recycle=[]; document.getElementById('recycleMediaPreview').innerHTML=''; refreshAll(); showToast('发布成功','success');
+    }
+
+    function renderMedia(mediaArray) {
+      if(!mediaArray||!mediaArray.length) return '';
+      return '<div style="display:flex;gap:6px;flex-wrap:wrap;margin:8px 0;">'+mediaArray.map(m=>{
+        if(m.type.startsWith('image/')) return `<div style="width:70px;height:70px;border-radius:8px;overflow:hidden;"><img src="${m.data}" style="width:100%;height:100%;object-fit:cover;"></div>`;
+        else if(m.type.startsWith('video/')) return `<div style="width:120px;height:70px;"><video src="${m.data}" controls style="width:100%;height:100%;"></video></div>`;
+        return '';
+      }).join('')+'</div>';
+    }
+
+    function refreshForumView() {
+      const data=getData(); const c=document.getElementById('forumPostsList');
+      if(!data.forumPosts.length) { c.innerHTML='<div class="empty-state">暂无帖子</div>'; return; }
+      c.innerHTML=data.forumPosts.map(p=>`<div class="card"><div><span class="badge badge-forum">${p.category}</span> ${p.title}</div><p>${p.content}</p>${renderMedia(p.media)}<small>${p.username} · ${new Date(p.date).toLocaleString()}</small>${(isAdmin()||getCurrentUser()?.id===p.userId)?`<button class="btn-sm btn-danger" onclick="deletePost('forum','${p.id}')">删除</button>`:''}</div>`).join('');
+    }
+    function refreshMarketView() {
+      const data=getData(); const c=document.getElementById('marketItemsList');
+      if(!data.marketItems.length) { c.innerHTML='<div class="empty-state">暂无物品</div>'; return; }
+      c.innerHTML='<div class="grid-2">'+data.marketItems.map(i=>{
+        const typeBadge = i.type==='rent' ? 'badge-rent' : 'badge-sell';
+        const typeText = i.type==='rent' ? '租用' : '出售';
+        return `<div class="card" style="cursor:pointer;" onclick="openMarketDetail('${i.id}')">
+          <div><span class="badge ${typeBadge}">${typeText}</span> <strong>${i.title}</strong></div>
+          <p>${i.description} · ¥${i.price}</p>
+          ${renderMedia(i.media)}
+          <small>${i.username}</small>
+          ${(isAdmin()||getCurrentUser()?.id===i.userId)?`<button class="btn-sm btn-danger" style="position:relative;z-index:10;" onclick="event.stopPropagation();deletePost('market','${i.id}')">删除</button>`:''}
+          ${i.paymentStatus==='paid' ? '<span style="color:green;margin-left:8px;">✔️ 已交易</span>' : ''}
+        </div>`;
+      }).join('')+'</div>';
+    }
+    function refreshRecycleView() {
+      const data=getData(); const c=document.getElementById('recycleItemsList');
+      if(!data.recycleItems.length) { c.innerHTML='<div class="empty-state">暂无回收</div>'; return; }
+      c.innerHTML='<div class="grid-2">'+data.recycleItems.map(i=>`<div class="card"><span class="badge badge-recycle">${i.category}</span> ${i.title}<p>${i.description}</p>${renderMedia(i.media)}<small>${i.username}</small>${(isAdmin()||getCurrentUser()?.id===i.userId)?`<button class="btn-sm btn-danger" onclick="deletePost('recycle','${i.id}')">删除</button>`:''}</div>`).join('')+'</div>';
+    }
+    function deletePost(type, id) {
+      const data=getData();
+      if(type==='forum') data.forumPosts=data.forumPosts.filter(x=>x.id!==id);
+      else if(type==='market') data.marketItems=data.marketItems.filter(x=>x.id!==id);
+      else if(type==='recycle') data.recycleItems=data.recycleItems.filter(x=>x.id!==id);
+      saveData(data); refreshAll(); showToast('已删除');
+    }
+    function refreshHomeLatest() {
+      const data=getData(); const all=[];
+      data.forumPosts.slice(0,3).forEach(p=>all.push({t:'论坛',txt:p.title}));
+      data.marketItems.slice(0,2).forEach(i=>all.push({t:'市场',txt:i.title}));
+      data.recycleItems.slice(0,2).forEach(i=>all.push({t:'回收',txt:i.title}));
+      document.getElementById('homeLatestPosts').innerHTML=all.length?all.map(a=>`<div>【${a.t}】${a.txt}</div>`).join(''):'暂无动态';
+    }
+    function refreshAll() { refreshForumView(); refreshMarketView(); refreshRecycleView(); refreshHomeLatest(); updateUI(); }
+
+    // ========== 市场详情 & 聊天 & 支付 ==========
+    function openMarketDetail(itemId) {
+      if(!getCurrentUser()) { showToast('请先登录查看详情','error'); openLoginModal(); return; }
+      const data = getData();
+      const item = data.marketItems.find(i=>i.id===itemId);
+      if(!item) return;
+      const overlay = document.getElementById('marketDetailOverlay');
+      const content = document.getElementById('marketDetailContent');
+      const user = getCurrentUser();
+      const isOwner = (user.id === item.userId);
+      const paid = item.paymentStatus === 'paid';
+
+      let html = `
+        <h3>${item.title}</h3>
+        <p><span class="badge ${item.type==='rent'?'badge-rent':'badge-sell'}">${item.type==='rent'?'租用':'出售'}</span>  ¥${item.price} · ${item.category}</p>
+        <p>${item.description}</p>
+        ${renderMedia(item.media)}
+        <p><small>发布者：${item.username} · ${new Date(item.date).toLocaleString()}</small></p>
+        ${paid ? '<p style="color:green;">✔️ 该物品已完成交易</p>' : ''}
+        <hr style="margin:12px 0;">
+        <h4>💬 与发布者聊天</h4>
+        <div class="chat-messages" id="chatMessagesContainer">${renderChatMessages(item.chatMessages)}</div>
+        <div style="display:flex;gap:8px;margin-top:8px;">
+          <input type="text" id="chatMessageInput" placeholder="输入消息..." style="flex:1;padding:8px;border-radius:20px;border:1px solid #ddd;">
+          <button class="btn btn-primary btn-sm" onclick="sendChatMessage('${item.id}')">发送</button>
+        </div>
+      `;
+
+      if(!paid && !isOwner) {
+        html += `
+          <div style="margin-top:16px;display:flex;gap:8px;justify-content:center;">
+            <button class="btn btn-wechat" onclick="initiatePayment('${item.id}','wechat')">💚 微信支付</button>
+            <button class="btn btn-alipay" onclick="initiatePayment('${item.id}','alipay')">💙 支付宝支付</button>
+          </div>
+        `;
+      }
+
+      content.innerHTML = html;
+      overlay.style.display = 'flex';
+      // 滚动聊天到底部
+      setTimeout(()=>{
+        const chatDiv = document.getElementById('chatMessagesContainer');
+        if(chatDiv) chatDiv.scrollTop = chatDiv.scrollHeight;
+      }, 10);
+    }
+
+    function closeMarketDetail() {
+      document.getElementById('marketDetailOverlay').style.display = 'none';
+      refreshMarketView();
+    }
+
+    function renderChatMessages(messages) {
+      if(!messages || messages.length===0) return '<div style="color:#999;text-align:center;">暂无消息，开始聊天吧</div>';
+      const currentUser = getCurrentUser();
+      return messages.map(m=>{
+        const isMine = currentUser && m.userId === currentUser.id;
+        return `<div class="chat-bubble ${isMine?'mine':'other'}">
+          <div class="msg">${m.text}</div>
+          <div class="meta">${m.username} · ${new Date(m.timestamp).toLocaleTimeString()}</div>
+        </div>`;
+      }).join('');
+    }
+
+    function sendChatMessage(itemId) {
+      const user = getCurrentUser();
+      if(!user) { showToast('请先登录','error'); return; }
+      const input = document.getElementById('chatMessageInput');
+      const text = input.value.trim();
+      if(!text) return;
+      const data = getData();
+      const item = data.marketItems.find(i=>i.id===itemId);
+      if(!item) return;
+      if(!item.chatMessages) item.chatMessages = [];
+      item.chatMessages.push({
+        userId: user.id,
+        username: user.wechatNickname || user.username,
+        avatar: user.avatar,
+        text: text,
+        timestamp: new Date().toISOString()
+      });
+      saveData(data);
+      input.value = '';
+      // 刷新聊天区域
+      const chatContainer = document.getElementById('chatMessagesContainer');
+      if(chatContainer) {
+        chatContainer.innerHTML = renderChatMessages(item.chatMessages);
+        chatContainer.scrollTop = chatContainer.scrollHeight;
+      }
+    }
+
+    function initiatePayment(itemId, method) {
+      const user = getCurrentUser();
+      if(!user) { showToast('请先登录','error'); return; }
+      const data = getData();
+      const item = data.marketItems.find(i=>i.id===itemId);
+      if(!item) return;
+      if(item.paymentStatus === 'paid') { showToast('该物品已完成交易','error'); return; }
+      if(user.id === item.userId) { showToast('不能购买自己的物品','error'); return; }
+
+      // 显示支付确认
+      const methodName = method==='wechat'?'微信支付':'支付宝支付';
+      if(!confirm(`确认使用 ${methodName} 支付 ¥${item.price} 吗？(演示)`)) return;
+
+      // 模拟支付成功
+      item.paymentStatus = 'paid';
+      saveData(data);
+      showToast(`✅ ${methodName}支付成功！交易完成`, 'success');
+      closeMarketDetail();
+      refreshMarketView();
+    }
+
+    // 点击模态框外部关闭
+    document.getElementById('marketDetailOverlay').addEventListener('click', function(e) {
+      if(e.target === this) closeMarketDetail();
+    });
+    document.getElementById('loginModalOverlay').addEventListener('click', function(e) {
+      if(e.target === this) closeLoginModal();
+    });
+
+    window.onload = function() { updateUI(); refreshAll(); };
+  </script>
+</body>
+</html>
